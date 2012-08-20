@@ -1,0 +1,1 @@
+This directory is the typical nodejs/express directory of your views.
