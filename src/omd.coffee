@@ -27,6 +27,8 @@ class Omd
     @baseIndent     = Array(5).join ' '
     @outL           = []
     @spacesPerlevel = 2
+    @cssFile        = '/stylesheets/omd.css'
+    @isOrdered      = true
   indentSpaces: (level = 1) ->
     s = ''
     if level > 0
@@ -38,6 +40,10 @@ class Omd
     str.length - strLeftTrimmed.length
   parseLines: (srcLinesArray) ->
     currLevel = -1
+    if @isOrdered 
+      listType = 'ol'
+    else 
+      listType = 'ul'
     outL      = []
     for i of srcLinesArray
       line = srcLinesArray[i]
@@ -49,14 +55,14 @@ class Omd
       if level != currLevel
         if level == 1 or currLevel == -1
           level = 1
-          outL.push('ul.l1')
+          outL.push("#{listType}.l1")
           outL.push(@indentSpaces() + 'li.l1')
           outL.push(@indentSpaces(2) + '| ' + heading)
           currLevel = 1
 
         else if level > currLevel
           level = currLevel = currLevel + 1
-          outL.push(@indentSpaces(currLevel + currLevel - 2) + 'ul.l' + level)
+          outL.push(@indentSpaces(currLevel + currLevel - 2) + "#{listType}.l" + level)
           outL.push(@indentSpaces(currLevel + currLevel - 1) + 'li.l' + level)
           outL.push(@indentSpaces(currLevel + currLevel) + '| ' + heading)
 
@@ -71,15 +77,16 @@ class Omd
 
     outL
   prependLines: (outL) ->
-    jadeStr = '''
+    @cssFileParts
+    jadeStr = """
       !!! 5
       html
         head
           meta(charset="utf-8")
-          link(rel='stylesheet', media='screen', href='/ol.css')
+          link(rel='stylesheet', media='screen', href='#{@cssFile}')
         body(lang='en')
 
-      '''
+      """
     # prepend baseIndent for each line
     for line in outL
       jadeStr += @baseIndent + line + "\n"

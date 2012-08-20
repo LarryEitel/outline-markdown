@@ -26,6 +26,8 @@
       this.baseIndent = Array(5).join(' ');
       this.outL = [];
       this.spacesPerlevel = 2;
+      this.cssFile = '/stylesheets/omd.css';
+      this.isOrdered = true;
     }
 
     Omd.prototype.indentSpaces = function(level) {
@@ -51,8 +53,13 @@
     };
 
     Omd.prototype.parseLines = function(srcLinesArray) {
-      var currLevel, heading, i, level, line, outL;
+      var currLevel, heading, i, level, line, listType, outL;
       currLevel = -1;
+      if (this.isOrdered) {
+        listType = 'ol';
+      } else {
+        listType = 'ul';
+      }
       outL = [];
       for (i in srcLinesArray) {
         line = srcLinesArray[i];
@@ -64,13 +71,13 @@
         if (level !== currLevel) {
           if (level === 1 || currLevel === -1) {
             level = 1;
-            outL.push('ul.l1');
+            outL.push("" + listType + ".l1");
             outL.push(this.indentSpaces() + 'li.l1');
             outL.push(this.indentSpaces(2) + '| ' + heading);
             currLevel = 1;
           } else if (level > currLevel) {
             level = currLevel = currLevel + 1;
-            outL.push(this.indentSpaces(currLevel + currLevel - 2) + 'ul.l' + level);
+            outL.push(this.indentSpaces(currLevel + currLevel - 2) + ("" + listType + ".l") + level);
             outL.push(this.indentSpaces(currLevel + currLevel - 1) + 'li.l' + level);
             outL.push(this.indentSpaces(currLevel + currLevel) + '| ' + heading);
           } else {
@@ -88,7 +95,8 @@
 
     Omd.prototype.prependLines = function(outL) {
       var jadeStr, line, _i, _len;
-      jadeStr = '!!! 5\nhtml\n  head\n    meta(charset="utf-8")\n    link(rel=\'stylesheet\', media=\'screen\', href=\'/ol.css\')\n  body(lang=\'en\')\n';
+      this.cssFileParts;
+      jadeStr = "!!! 5\nhtml\n  head\n    meta(charset=\"utf-8\")\n    link(rel='stylesheet', media='screen', href='" + this.cssFile + "')\n  body(lang='en')\n";
       for (_i = 0, _len = outL.length; _i < _len; _i++) {
         line = outL[_i];
         jadeStr += this.baseIndent + line + "\n";
