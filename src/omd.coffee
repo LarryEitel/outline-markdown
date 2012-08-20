@@ -21,15 +21,6 @@ stripFileExtension = (filename) ->
 
 class Omd
   constructor: ->
-    # @rootdir        = opts.rootdir
-    # @subdir         = opts.subdir
-    # @srcName        = opts.srcName
-    # @dstPath        = opts.dstPath
-    # @basePath       = path.join(@rootdir, @subdir)
-    # @fNameSrc       = path.join(@basePath, @srcName)
-    # @fileNameOnly   = stripFileExtension(@srcName)
-    # @fNameJade      = path.join(@dstPath, @subdir, @fileNameOnly + '.jade')
-    # @fNameHtml      = path.join(@dstPath, @subdir, @fileNameOnly + '.html')
     @srcName      = null
     @dstName      = null
     @baseIndent     = Array(5).join ' '
@@ -107,10 +98,43 @@ class Omd
 
     callback()
 
-exports.Omd = Omd
+  buildIndex: (basePath, srcPath, dstPath, callback) ->
+    files = []
+    jadeStr = ''
+    @crawlForFiles srcPath, (callback) ->
+      # console.log 'crawlForFiles'
+      # callback
+      files = callback
 
-# exports.parse = (srcPath, dstPath) ->
-#   grunt.file.recurse srcPath, (abspath, rootdir, subdir, filename) ->
-#     if grunt.file.isMatch('*.ol', filename)
-#       # parseOl path.join(rootdir, subdir), filename, dstPath
-#       parseOl rootdir, subdir, filename, dstPath
+    return null if not files
+
+    jadeStr = '''
+      extends ../layout
+
+      block content
+        h1= title
+        ul
+      '''    
+
+    for file in files
+      fPath = file.fPath
+      jadeStr += '    '
+      jadeStr += "\n    li\n      a(href=\"#{basePath}/#{fPath}\") #{fPath}"
+
+    jadeFile = path.join(dstPath, 'index.jade')
+
+    fse.mkdirSync dstPath
+    fs.writeFileSync jadeFile, jadeStr, 'utf8'
+    callback
+
+  crawlForFiles: (@srcPath, callback) ->
+    files = []
+    grunt.file.recurse @srcPath, (abspath, rootdir, subdir, fileName) ->
+      if grunt.file.isMatch('*.omd', fileName)
+        files.push 
+          subdir: subdir
+          fName: fileName
+          fPath: path.join(subdir, fileName.substr(0, fileName.length-4)).replace /\\/g, "/"
+    callback files
+
+exports.Omd = Omd

@@ -7,16 +7,41 @@ fs              = require "fs"
 #Q              = require("q")
 # require("mocha-as-promised")()
 
-rootdir         = './test/docs'
+testFile     = 'test.omd'
+srcBasePath  = 'docs'
+srcPath      = path.join(__dirname, 'docs')
+srcName      = path.join(srcPath, testFile)
+dstPath      = path.join(__dirname, 'views', 'docs')
+dstJadeFile  = path.join(dstPath, 'test.jade')
+dstIndexFile = path.join(dstPath, 'index.jade')
+testJadeFile = path.join(dstPath, 'test.should.equal.jade')
 
-testFile        = 'test.omd'
-dstPath         = path.join(__dirname, 'views', 'docs')
-srcName         = path.join(__dirname, 'docs', testFile)
-dstJadeFile     = path.join(__dirname, 'views', 'docs', 'test.jade')
-testJadeFile    = path.join(__dirname, 'views', 'docs', 'test.should.equal.jade')
-# opts          = {rootdir: rootdir, subdir: subdir, srcName: srcName, dstPath: dstPath}
+omd          = new (require '../omd').Omd 
 
-omd             = new (require '../omd').Omd 
+describe 'When crawling for files', ->
+  before (done) ->
+    if fs.existsSync(dstIndexFile)
+      fs.unlinkSync(dstIndexFile)
+    done()
+
+  # before (done) ->
+  #   omd.crawlForFiles srcPath, (callback) ->
+  #   done()
+
+  it "should return a valid array of found files", ->
+    #console.log 
+    testStr = ''
+    omd.crawlForFiles srcPath, (callback) ->
+      files = callback
+      for file in files
+        #console.log file.fPath
+        testStr += file.fPath
+
+      testStr.should.equal 'd1/d1-ad1/d1-bd1/d11/d11-ad1/d11/d11-bd1/d12/d12-ad1/d12/d12-bd1/d12/d121/d121-atest'
+
+  it "should create a .jade file with listing of all .oml documents", ->
+    omd.buildIndex srcBasePath, srcPath, dstPath, (callback) ->
+      fs.existsSync(dstIndexFile).should.equal true
 
 describe 'Sample ' + testFile, ->
   before (done) ->

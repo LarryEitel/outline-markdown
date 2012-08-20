@@ -106,6 +106,45 @@
       return callback();
     };
 
+    Omd.prototype.buildIndex = function(basePath, srcPath, dstPath, callback) {
+      var fPath, file, files, jadeFile, jadeStr, _i, _len;
+      files = [];
+      jadeStr = '';
+      this.crawlForFiles(srcPath, function(callback) {
+        return files = callback;
+      });
+      if (!files) {
+        return null;
+      }
+      jadeStr = 'extends ../layout\n\nblock content\n  h1= title\n  ul';
+      for (_i = 0, _len = files.length; _i < _len; _i++) {
+        file = files[_i];
+        fPath = file.fPath;
+        jadeStr += '    ';
+        jadeStr += "\n    li\n      a(href=\"" + basePath + "/" + fPath + "\") " + fPath;
+      }
+      jadeFile = path.join(dstPath, 'index.jade');
+      fse.mkdirSync(dstPath);
+      fs.writeFileSync(jadeFile, jadeStr, 'utf8');
+      return callback;
+    };
+
+    Omd.prototype.crawlForFiles = function(srcPath, callback) {
+      var files;
+      this.srcPath = srcPath;
+      files = [];
+      grunt.file.recurse(this.srcPath, function(abspath, rootdir, subdir, fileName) {
+        if (grunt.file.isMatch('*.omd', fileName)) {
+          return files.push({
+            subdir: subdir,
+            fName: fileName,
+            fPath: path.join(subdir, fileName.substr(0, fileName.length - 4)).replace(/\\/g, "/")
+          });
+        }
+      });
+      return callback(files);
+    };
+
     return Omd;
 
   })();
