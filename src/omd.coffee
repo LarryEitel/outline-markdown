@@ -21,8 +21,9 @@ stripFileExtension = (filename) ->
 
 class Omd
   constructor: ->
-    @srcName      = null
-    @dstName      = null
+    @regExpLinks    = /\b((https?|ftp|file):\/\/[\-A-Z0-9+&@#\/%?=~_|$!:,.;]*[A-Z0-9+&@#\/%=~_|$])/ig
+    @srcName        = null
+    @dstName        = null
     @baseIndent     = Array(5).join ' '
     @outL           = []
     @spacesPerlevel = 2
@@ -31,6 +32,10 @@ class Omd
     if level > 0
       s = '                                                   '.substr(0, level * @spacesPerlevel)
     s
+  firstNonSpacePosition: (str) ->
+    strLeftTrimmed = (str.replace /^\s+/g, "")
+    0 if not strLeftTrimmed.length
+    str.length - strLeftTrimmed.length
   parseLines: (srcLinesArray) ->
     currLevel = -1
     outL      = []
@@ -81,9 +86,28 @@ class Omd
     jadeStr
   buildJade: (outL) ->
     fse.mkdirSync @dstPath
-    #console.log @dstName
     fs.writeFileSync @dstName, @prependLines(outL), 'utf8'
-  
+
+  parseMarkdown: (outL) ->
+    i = 0
+    while i < outL.length
+      line = outL[i]
+      match = @regExpLinks.exec line
+      if match
+        # console.log '-----------------------'
+        # console.log 'match', match[0]
+        # console.log @firstNonSpacePosition line
+        spaces = @baseIndent + Array(@firstNonSpacePosition(line) + 1).join(' ')
+        line = line.replace @regExpLinks, "\n#{spaces}a(href=\"$1\") $1\n#{spaces}| "
+        # console.log
+        # console.log line
+        # console.log '-----------------------'
+        outL[i] = line
+      i++
+
+    return outL
+
+
   parse: (@srcName, @dstPath, callback) ->
     # console.log 'parse', @srcName, @dstPath
     # get filename only
@@ -93,7 +117,7 @@ class Omd
     @dstName = path.join(@dstPath, filename.substr(0, filename.length-4) + '.jade')
     data = fs.readFileSync @srcName, 'utf8'
     srcLinesArray = data.toString().split("\n")
-    @buildJade @parseLines(srcLinesArray), (err) ->
+    @buildJade @parseMarkdown(@parseLines(srcLinesArray)), (err) ->
       return err if err
 
     callback()
@@ -126,7 +150,6 @@ class Omd
     fse.mkdirSync dstPath
     fs.writeFileSync jadeFile, jadeStr, 'utf8'
     callback
-
   crawlForFiles: (@srcPath, callback) ->
     files = []
     grunt.file.recurse @srcPath, (abspath, rootdir, subdir, fileName) ->

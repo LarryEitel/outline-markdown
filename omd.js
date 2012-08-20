@@ -20,6 +20,7 @@
   Omd = (function() {
 
     function Omd() {
+      this.regExpLinks = /\b((https?|ftp|file):\/\/[\-A-Z0-9+&@#\/%?=~_|$!:,.;]*[A-Z0-9+&@#\/%=~_|$])/ig;
       this.srcName = null;
       this.dstName = null;
       this.baseIndent = Array(5).join(' ');
@@ -37,6 +38,16 @@
         s = '                                                   '.substr(0, level * this.spacesPerlevel);
       }
       return s;
+    };
+
+    Omd.prototype.firstNonSpacePosition = function(str) {
+      var strLeftTrimmed;
+      strLeftTrimmed = str.replace(/^\s+/g, "");
+      if (!strLeftTrimmed.length) {
+        0;
+
+      }
+      return str.length - strLeftTrimmed.length;
     };
 
     Omd.prototype.parseLines = function(srcLinesArray) {
@@ -90,6 +101,22 @@
       return fs.writeFileSync(this.dstName, this.prependLines(outL), 'utf8');
     };
 
+    Omd.prototype.parseMarkdown = function(outL) {
+      var i, line, match, spaces;
+      i = 0;
+      while (i < outL.length) {
+        line = outL[i];
+        match = this.regExpLinks.exec(line);
+        if (match) {
+          spaces = this.baseIndent + Array(this.firstNonSpacePosition(line) + 1).join(' ');
+          line = line.replace(this.regExpLinks, "\n" + spaces + "a(href=\"$1\") $1\n" + spaces + "| ");
+          outL[i] = line;
+        }
+        i++;
+      }
+      return outL;
+    };
+
     Omd.prototype.parse = function(srcName, dstPath, callback) {
       var data, filename, srcLinesArray;
       this.srcName = srcName;
@@ -98,7 +125,7 @@
       this.dstName = path.join(this.dstPath, filename.substr(0, filename.length - 4) + '.jade');
       data = fs.readFileSync(this.srcName, 'utf8');
       srcLinesArray = data.toString().split("\n");
-      this.buildJade(this.parseLines(srcLinesArray), function(err) {
+      this.buildJade(this.parseMarkdown(this.parseLines(srcLinesArray)), function(err) {
         if (err) {
           return err;
         }

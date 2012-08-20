@@ -63,14 +63,8 @@
         omd.parse(srcName, dstPath, function(callback) {});
         return done();
       });
-      it("should be generate a .jade file", function() {
+      return it("should be generate a .jade file", function() {
         return fs.existsSync(dstJadeFile).should.equal(true);
-      });
-      return it("should be valid", function() {
-        var dstJadeFileStr, testJadeFileStr;
-        testJadeFileStr = fs.readFileSync(testJadeFile).toString();
-        dstJadeFileStr = fs.readFileSync(dstJadeFile).toString();
-        return dstJadeFileStr.length.should.equal(670);
       });
     });
   });
