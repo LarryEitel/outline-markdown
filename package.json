@@ -18,14 +18,11 @@
     "markdown"
   ],
   "dependencies": {
-    "grunt": "~0.3.12",
-    "fs-extra": "~0.1.3",
+    "grunt": "*",
+    "fs-extra": "*",
     "request": "*",
     "mocha": "*",
     "should": "*",
-    "mocha-as-promised": "~1.1.0",
-    "chai-as-promised": "~3.2.2",
-    "chai": "~1.2.0",
-    "q": "~0.8.6"
+    "pygments": "*"
   }
 }

@@ -1,3 +1,5 @@
-ul {
-  list-style-type: none;
-}
+OL { list-style-type: upper-roman; }
+OL OL { list-style-type: upper-alpha; }
+OL OL OL { list-style-type: decimal; }
+OL OL OL OL { list-style-type: lower-alpha; }
+OL OL OL OL OL { list-style-type: lower-roman; }

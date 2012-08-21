@@ -4,34 +4,38 @@ html
     meta(charset="utf-8")
     link(rel='stylesheet', media='screen', href='/stylesheets/omd.css')
   body(lang='en')
-    ul.l1
-      li.l1
+    a(href="/") Home | 
+    a(href="/docs") Docs
+    ol
+      li
         | Test Outline 
-        ul.l2
-          li.l2
+        ul
+          li
             | I
-            ul.l3
-              li.l3
-                | A 
+            ol
+              li
+                | ordered heading
+                pre 
+                  | it "should be generate a .jade file", ->
+                  |   fs.existsSync(dstJadeFile).should.equal true
+              li
+                | 
                 a(href="http://jw.org/") http://jw.org/
                 | 
-                ul.l4
-                  li.l4
-                    | 1
-              li.l3
-                | B
-                ul.l4
-                  li.l4
-                    | 1
-                  li.l4
+                ul
+                  li
+                    | 1 
+                  li
                     | 2 
                     a(href="http://xchg.com/") http://xchg.com/
                     |  Bible Search Engine
-          li.l2
+          li
             | II
-            ul.l3
-              li.l3
+            ul
+              li
                 | A
-                ul.l4
-                  li.l4
-                    | 1
+                ul
+                  li
+                    | 1 
+                    a(href="http://github.com") GitHub
+                    | 
